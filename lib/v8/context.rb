@@ -20,17 +20,19 @@ module V8
       end
       err = nil
       value = nil
-      C::TryCatch.try do |try|
-        @native.enter do
-          script = C::Script::Compile(@to.v8(javascript.to_s), @to.v8(filename.to_s))
-          if try.HasCaught()
-            err = JSError.new(try, @to)
-          else
-            result = script.Run()
+      C::Locker() do
+        C::TryCatch.try do |try|
+          @native.enter do
+            script = C::Script::Compile(@to.v8(javascript.to_s), @to.v8(filename.to_s))
             if try.HasCaught()
               err = JSError.new(try, @to)
             else
-              value = @to.rb(result)
+              result = script.RunTimeout(3000)
+              if try.HasCaught()
+                err = JSError.new(try, @to)
+              else
+                value = @to.rb(result)
+              end
             end
           end
         end
@@ -70,14 +72,16 @@ module V8
     class Context
       def enter
         if block_given?
-          if IsEntered()
-            yield(self)
-          else
-            Enter()
-            begin
+          V8::C::Locker() do
+            if IsEntered()
               yield(self)
-            ensure
-              Exit()
+            else
+              Enter()
+              begin
+                yield(self)
+              ensure
+                Exit()
+              end
             end
           end
         end

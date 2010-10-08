@@ -29,36 +29,30 @@ namespace {
     return result.IsEmpty() ? Qnil : rr_v82rb(result);
   }
 
-
   VALUE RunTimeout(VALUE self,VALUE timeout) {
+    int v8_thread_id;
     {
       v8::Locker locker;
+      v8::V8::Initialize();
       v8::Locker::StartPreemption(1);
+      v8_thread_id = v8::V8::GetCurrentThreadId();
     }
 
+    v8::Locker locker;
 
-    Local<Script> script(V8_Ref_Get<Script>(self));
-    ExecutorThread executor(script);
-    executor.Start();
-     int t_id;
-    printf("Started executor\n");
-    v8::internal::OS::Sleep(2000);
-    { 
-       v8::Locker locker;
-       t_id = executor.GetV8ThreadId();
-    }
-
-    printf("Got e thread: %d\n",t_id);
-
-    TerminatorThread terminator(NUM2INT(timeout));
+    TerminatorThread terminator(v8_thread_id, NUM2INT(timeout));
     terminator.Start(); 
-    executor.Join();
+
+    VALUE result = Run(self);
+
     v8::V8::TerminateExecution(terminator.GetV8ThreadId());
-    Local<Value> result(executor.result());
-    v8::Locker::StopPreemption();
-    return result.IsEmpty() ? Qnil : rr_v82rb(result);
+
+    if(terminator.Timedout()) {
+      // Would like to return a timeout error
     }
 
+    return result;
+  }
 }
 
 void rr_init_script() {
