@@ -364,7 +364,7 @@ class Thread: public ThreadHandle {
 
   // Create new thread.
   Thread();
-  virtual ~Thread();
+  virtual ~Thread()=0;
 
   // Start new thread by calling the Run() method in the new thread.
   void Start();

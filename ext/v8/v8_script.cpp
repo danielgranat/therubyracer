@@ -1,6 +1,8 @@
 #include "v8.h"
+#include "platform.h"
 #include "v8_ref.h"
 #include "v8_script.h"
+#include "v8_terminator.h"
 
 using namespace v8;
 
@@ -26,6 +28,37 @@ namespace {
     Local<Value> result(script->Run());
     return result.IsEmpty() ? Qnil : rr_v82rb(result);
   }
+
+
+  VALUE RunTimeout(VALUE self,VALUE timeout) {
+    {
+      v8::Locker locker;
+      v8::Locker::StartPreemption(1);
+    }
+
+
+    Local<Script> script(V8_Ref_Get<Script>(self));
+    ExecutorThread executor(script);
+    executor.Start();
+     int t_id;
+    printf("Started executor\n");
+    v8::internal::OS::Sleep(2000);
+    { 
+       v8::Locker locker;
+       t_id = executor.GetV8ThreadId();
+    }
+
+    printf("Got e thread: %d\n",t_id);
+
+    TerminatorThread terminator(NUM2INT(timeout));
+    terminator.Start(); 
+    executor.Join();
+    v8::V8::TerminateExecution(terminator.GetV8ThreadId());
+    Local<Value> result(executor.result());
+    v8::Locker::StopPreemption();
+    return result.IsEmpty() ? Qnil : rr_v82rb(result);
+    }
+
 }
 
 void rr_init_script() {
@@ -33,4 +66,5 @@ void rr_init_script() {
   rr_define_singleton_method(ScriptClass, "New", New, 2);
   rr_define_singleton_method(ScriptClass, "Compile", Compile, 2);
   rr_define_method(ScriptClass, "Run", Run, 0);
+  rr_define_method(ScriptClass, "RunTimeout", RunTimeout, 1);
 }
