@@ -7,14 +7,25 @@ using namespace v8;
 
 void TerminatorThread::Run()
 {
-  v8::Locker locker;
-  v8_thread_id_ = v8::V8::GetCurrentThreadId();
+  const int SLEEP_FOR = 10;
 
-  v8::internal::OS::Sleep(timeout_);
+  internal::OS::Sleep(1);
+
+  for(int sleep=SLEEP_FOR; sleep<timeout_; sleep+=SLEEP_FOR) {
+    if(finished_) {
+      return;
+    }
+    internal::OS::Sleep(SLEEP_FOR);
+  }
+
+  if(finished_) {
+    return;
+  }
+
+  timedout_ = true;
   {
-    v8::Locker locker;
-    timedout_ = true;
-    v8::V8::TerminateExecution(executing_thread_id_);
+    Locker locker;
+    V8::TerminateExecution(executing_thread_id_);
   }
 }
 

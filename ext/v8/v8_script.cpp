@@ -30,25 +30,17 @@ namespace {
   }
 
   VALUE RunTimeout(VALUE self,VALUE timeout) {
-    int v8_thread_id;
-    {
-      v8::Locker locker;
-      v8::V8::Initialize();
-      v8::Locker::StartPreemption(1);
-      v8_thread_id = v8::V8::GetCurrentThreadId();
-    }
-
-    v8::Locker locker;
-
-    TerminatorThread terminator(v8_thread_id, NUM2INT(timeout));
-    terminator.Start(); 
+    Locker locker;
+    TerminatorThread terminator(V8::GetCurrentThreadId(), NUM2INT(rb_to_int(timeout)));
+    terminator.Start();
 
     VALUE result = Run(self);
 
-    v8::V8::TerminateExecution(terminator.GetV8ThreadId());
+    terminator.Finished();
+    terminator.Join();
 
     if(terminator.Timedout()) {
-      // Would like to return a timeout error
+      // would like to throw a timeout error
     }
 
     return result;

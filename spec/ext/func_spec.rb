@@ -46,4 +46,13 @@ describe C::Function do
       cxt.eval('say("Hello", 3)').should == "HelloHelloHello"
     end
   end
+
+  it "should be able to timeout" do
+    lambda {
+      Context.new do |cxt|
+        cxt.timeout = 100
+        cxt.eval 'while(true) {}'
+      end
+    }.should raise_error(V8::JSError)
+  end
 end

@@ -3,7 +3,9 @@ require 'stringio'
 module V8
   class Context    
     attr_reader :native, :scope, :access
+    attr_accessor :timeout
     def initialize(opts = {})
+      C::Locker::StartPreemption(10)
       @access = Access.new
       @to = Portal.new(self, @access)
       @native = opts[:with] ? C::Context::New(@to.rubytemplate) : C::Context::New()
@@ -20,6 +22,7 @@ module V8
       end
       err = nil
       value = nil
+
       C::Locker() do
         C::TryCatch.try do |try|
           @native.enter do
@@ -27,7 +30,7 @@ module V8
             if try.HasCaught()
               err = JSError.new(try, @to)
             else
-              result = script.RunTimeout(3000)
+              result = @timeout ? script.RunTimeout(@timeout) : script.Run()
               if try.HasCaught()
                 err = JSError.new(try, @to)
               else
@@ -37,6 +40,7 @@ module V8
           end
         end
       end
+
       raise err if err
       return value
     end
@@ -72,16 +76,14 @@ module V8
     class Context
       def enter
         if block_given?
-          V8::C::Locker() do
-            if IsEntered()
+          if IsEntered()
+            yield(self)
+          else
+            Enter()
+            begin
               yield(self)
-            else
-              Enter()
-              begin
-                yield(self)
-              ensure
-                Exit()
-              end
+            ensure
+              Exit()
             end
           end
         end
