@@ -7,7 +7,6 @@
 using namespace v8;
 
 namespace {
-
   VALUE New(VALUE self, VALUE source, VALUE source_name) {
     HandleScope scope;
     Local<String> src(rr_rb2v8(source)->ToString());
@@ -45,12 +44,21 @@ namespace {
 
     return result;
   }
+
+  VALUE SetConstraints(VALUE self, VALUE young_size, VALUE old_size) {
+    static const int K = 1024;
+    ResourceConstraints constraints;
+    constraints.set_max_young_space_size(NUM2INT(rb_to_int(young_size)) * K);
+    constraints.set_max_old_space_size(NUM2INT(rb_to_int(old_size)) * K);
+    return Qnil;
+  }
 }
 
 void rr_init_script() {
   VALUE ScriptClass = rr_define_class("Script");
   rr_define_singleton_method(ScriptClass, "New", New, 2);
   rr_define_singleton_method(ScriptClass, "Compile", Compile, 2);
+  rr_define_singleton_method(ScriptClass, "SetConstraints", SetConstraints, 2);
   rr_define_method(ScriptClass, "Run", Run, 0);
   rr_define_method(ScriptClass, "RunTimeout", RunTimeout, 1);
 }

@@ -70,6 +70,10 @@ module V8
     def V8.eval(*args)
       V8::Context.eval(*args)
     end
+
+    def self.constraints(young_size, old_size)
+      C::Script::SetConstraints(young_size, old_size)
+    end
   end
 
   module C
