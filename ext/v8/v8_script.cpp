@@ -50,7 +50,7 @@ namespace {
     ResourceConstraints constraints;
     constraints.set_max_young_space_size(NUM2INT(rb_to_int(young_size)) * K);
     constraints.set_max_old_space_size(NUM2INT(rb_to_int(old_size)) * K);
-    return Qnil;
+    return rr_v82rb(SetResourceConstraints(&constraints));
   }
 }
 
