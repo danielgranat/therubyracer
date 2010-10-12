@@ -7,7 +7,7 @@
 using namespace v8;
 
 namespace {
-  static bool Timedout;
+  VALUE TimeoutErrorClass;
 
   VALUE New(VALUE self, VALUE source, VALUE source_name) {
     HandleScope scope;
@@ -25,7 +25,6 @@ namespace {
 
   VALUE Run(VALUE self) {
     HandleScope scope;
-    Timedout = false;
     Local<Script> script(V8_Ref_Get<Script>(self));
     Local<Value> result(script->Run());
     return result.IsEmpty() ? Qnil : rr_v82rb(result);
@@ -33,6 +32,7 @@ namespace {
 
   VALUE RunTimeout(VALUE self,VALUE timeout) {
     Locker locker;
+
     TerminatorThread terminator(V8::GetCurrentThreadId(), NUM2INT(rb_to_int(timeout)));
     terminator.Start();
 
@@ -42,7 +42,7 @@ namespace {
     terminator.Join();
 
     if(terminator.Timedout()) {
-      Timedout = true;
+      return TimeoutErrorClass;
     }
 
     return result;
@@ -55,18 +55,14 @@ namespace {
     constraints.set_max_old_space_size(NUM2INT(rb_to_int(old_size)) * K);
     return rr_v82rb(SetResourceConstraints(&constraints));
   }
-
-  VALUE GetTimedout(VALUE self) {
-    return rr_v82rb(Timedout);
-  }
 }
 
 void rr_init_script() {
+  TimeoutErrorClass = rr_define_class("TimeoutError", rb_eException);
   VALUE ScriptClass = rr_define_class("Script");
   rr_define_singleton_method(ScriptClass, "New", New, 2);
   rr_define_singleton_method(ScriptClass, "Compile", Compile, 2);
   rr_define_singleton_method(ScriptClass, "SetConstraints", SetConstraints, 2);
   rr_define_method(ScriptClass, "Run", Run, 0);
   rr_define_method(ScriptClass, "RunTimeout", RunTimeout, 1);
-  rr_define_method(ScriptClass, "Timedout", GetTimedout, 0);
 }
