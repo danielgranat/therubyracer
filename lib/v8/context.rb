@@ -31,7 +31,9 @@ module V8
               err = JSError.new(try, @to)
             else
               result = @timeout ? script.RunTimeout(@timeout) : script.Run()
-              if try.HasCaught()
+              if script.Timedout()
+                err = Timeout::Error.new "timed out"
+              elsif try.HasCaught()
                 err = JSError.new(try, @to)
               else
                 value = @to.rb(result)

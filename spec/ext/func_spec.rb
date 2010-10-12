@@ -53,6 +53,6 @@ describe C::Function do
         cxt.timeout = 100
         cxt.eval 'while(true) {}'
       end
-    }.should raise_error(V8::JSError)
+    }.should raise_error(Timeout::Error)
   end
 end

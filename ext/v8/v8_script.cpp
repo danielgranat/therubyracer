@@ -7,6 +7,8 @@
 using namespace v8;
 
 namespace {
+  static bool Timedout;
+
   VALUE New(VALUE self, VALUE source, VALUE source_name) {
     HandleScope scope;
     Local<String> src(rr_rb2v8(source)->ToString());
@@ -23,6 +25,7 @@ namespace {
 
   VALUE Run(VALUE self) {
     HandleScope scope;
+    Timedout = false;
     Local<Script> script(V8_Ref_Get<Script>(self));
     Local<Value> result(script->Run());
     return result.IsEmpty() ? Qnil : rr_v82rb(result);
@@ -39,7 +42,7 @@ namespace {
     terminator.Join();
 
     if(terminator.Timedout()) {
-      // would like to throw a timeout error
+      Timedout = true;
     }
 
     return result;
@@ -52,6 +55,10 @@ namespace {
     constraints.set_max_old_space_size(NUM2INT(rb_to_int(old_size)) * K);
     return rr_v82rb(SetResourceConstraints(&constraints));
   }
+
+  VALUE GetTimedout(VALUE self) {
+    return rr_v82rb(Timedout);
+  }
 }
 
 void rr_init_script() {
@@ -61,4 +68,5 @@ void rr_init_script() {
   rr_define_singleton_method(ScriptClass, "SetConstraints", SetConstraints, 2);
   rr_define_method(ScriptClass, "Run", Run, 0);
   rr_define_method(ScriptClass, "RunTimeout", RunTimeout, 1);
+  rr_define_method(ScriptClass, "Timedout", GetTimedout, 0);
 }
