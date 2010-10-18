@@ -25,6 +25,7 @@ $(SCONS): $(SCONSSRC)
 $(V8SRC): build
 	cp -r 2.3.3 build/v8
 	patch -td build/v8 -i ../../fpic-on-linux-amd64.patch
+	patch -td build/v8/src -i ../../../platform-thread-missing-destructor.patch
 
 $(SCONSSRC): build
 	cp -r scons build

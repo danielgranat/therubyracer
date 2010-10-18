@@ -6,7 +6,7 @@
 
 using namespace v8;
 
-class TerminatorThread : public v8::internal::Thread {
+class TerminatorThread : public internal::Thread {
  public:
   explicit TerminatorThread(int executing_thread_id,int timeout) : executing_thread_id_(executing_thread_id), timeout_(timeout), timedout_(false), finished_(false) {
     sem_ = internal::OS::CreateSemaphore(0);
