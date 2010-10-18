@@ -1,11 +1,11 @@
 #include "v8.h"
+#include "platform.h"
 #include "v8_ref.h"
 #include "v8_script.h"
 
 using namespace v8;
 
 namespace {
-
   VALUE New(VALUE self, VALUE source, VALUE source_name) {
     HandleScope scope;
     Local<String> src(rr_rb2v8(source)->ToString());

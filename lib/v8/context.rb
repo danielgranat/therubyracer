@@ -3,7 +3,9 @@ require 'stringio'
 module V8
   class Context    
     attr_reader :native, :scope, :access
+    attr_accessor :timeout
     def initialize(opts = {})
+      C::Locker::StartPreemption(10)
       @access = Access.new
       @to = Portal.new(self, @access)
       @native = opts[:with] ? C::Context::New(@to.rubytemplate) : C::Context::New()
@@ -20,21 +22,27 @@ module V8
       end
       err = nil
       value = nil
-      C::TryCatch.try do |try|
-        @native.enter do
-          script = C::Script::Compile(@to.v8(javascript.to_s), @to.v8(filename.to_s))
-          if try.HasCaught()
-            err = JSError.new(try, @to)
-          else
-            result = script.Run()
+
+      C::Locker() do
+        C::TryCatch.try do |try|
+          @native.enter do
+            script = C::Script::Compile(@to.v8(javascript.to_s), @to.v8(filename.to_s))
             if try.HasCaught()
               err = JSError.new(try, @to)
             else
-              value = @to.rb(result)
+              result = @timeout ? C::Terminator::Run(script, @timeout) : script.Run()
+              if result == C::TimeoutError
+                err = Timeout::Error.new "Timed out"
+              elsif try.HasCaught()
+                err = JSError.new(try, @to)
+              else
+                value = @to.rb(result)
+              end
             end
           end
         end
       end
+
       raise err if err
       return value
     end

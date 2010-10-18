@@ -13,6 +13,8 @@
 #include "v8_external.h"
 #include "v8_exception.h"
 #include "v8_locker.h"
+#include "v8_constraints.h"
+#include "v8_terminator.h"
 
 #include <stdio.h>
 
@@ -37,5 +39,7 @@ extern "C" {
         rr_init_v8_external();
         rr_init_v8_exception();
         rr_init_v8_locker();
+        rr_init_constraints();
+        rr_init_terminator();
     }
 }
