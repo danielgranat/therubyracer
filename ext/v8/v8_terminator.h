@@ -1,3 +1,6 @@
+#ifndef _RR_V8_TERMINATOR_
+#define _RR_V8_TERMINATOR_
+
 #include "v8.h"
 #include "platform.h"
 
@@ -20,3 +23,7 @@ class TerminatorThread : public v8::internal::Thread {
     bool finished_;
     internal::Semaphore* sem_;
 };
+
+void rr_init_terminator();
+
+#endif

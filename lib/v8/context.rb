@@ -30,7 +30,7 @@ module V8
             if try.HasCaught()
               err = JSError.new(try, @to)
             else
-              result = @timeout ? script.RunTimeout(@timeout) : script.Run()
+              result = @timeout ? C::Terminator::Run(script, @timeout) : script.Run()
               if result == C::TimeoutError
                 err = Timeout::Error.new "Timed out"
               elsif try.HasCaught()
