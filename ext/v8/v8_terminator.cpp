@@ -5,18 +5,8 @@
 
 using namespace v8;
 
-void TerminatorThread::Run()
-{
-  const int SLEEP_FOR = 10;
-
-  internal::OS::Sleep(1);
-
-  for(int sleep=SLEEP_FOR; sleep<timeout_; sleep+=SLEEP_FOR) {
-    if(finished_) {
-      return;
-    }
-    internal::OS::Sleep(SLEEP_FOR);
-  }
+void TerminatorThread::Run() {
+  sem_->Wait(timeout_);
 
   if(finished_) {
     return;
@@ -29,3 +19,11 @@ void TerminatorThread::Run()
   }
 }
 
+void TerminatorThread::Finished() { 
+  finished_ = true; 
+  sem_->Signal();
+}
+
+TerminatorThread::~TerminatorThread() {
+  delete sem_;
+}
