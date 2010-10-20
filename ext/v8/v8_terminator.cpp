@@ -34,24 +34,32 @@ using namespace v8;
 namespace {
   VALUE TimeoutErrorClass;
 
-  VALUE Run(VALUE self, VALUE ref, VALUE timeout) {
+  VALUE Run(VALUE self, VALUE timeout, VALUE ref) {
     Locker locker;
 
     TerminatorThread terminator(V8::GetCurrentThreadId(), NUM2INT(rb_to_int(timeout)));
     terminator.Start();
 
-    HandleScope scope;
-    Local<Script> script(V8_Ref_Get<Script>(ref));
-    Local<Value> result(script->Run());
+    VALUE result = Qnil;
+    if(ref && ref != Qnil) {
+      HandleScope scope;
+      Local<Script> script(V8_Ref_Get<Script>(ref));
+      Local<Value> value(script->Run());
+      if(value.IsEmpty() == false) {
+        result = rr_v82rb(value);
+      }
+    } else {
+      rb_yield(Qnil);
+    }
 
     terminator.Finished();
     terminator.Join();
 
     if(terminator.Timedout()) {
-      return TimeoutErrorClass;
+      result = TimeoutErrorClass;
     }
 
-    return result.IsEmpty() ? Qnil : rr_v82rb(result);
+    return result;
   }
 }
 

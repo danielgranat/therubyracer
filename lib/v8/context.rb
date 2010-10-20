@@ -4,6 +4,7 @@ module V8
   class Context    
     attr_reader :native, :scope, :access
     attr_accessor :timeout
+
     def initialize(opts = {})
       C::Locker::StartPreemption(10)
       @access = Access.new
@@ -30,8 +31,18 @@ module V8
             if try.HasCaught()
               err = JSError.new(try, @to)
             else
-              result = @timeout ? C::Terminator::Run(script, @timeout) : script.Run()
-              if result == C::TimeoutError
+              
+              timedout = false
+              result = nil
+              if @timeout
+                timedout = C::Terminator::Run(@timeout, nil) do
+                  result = script.Run()
+                end
+              else
+                result = script.Run()
+              end
+
+              if timedout
                 err = Timeout::Error.new "Timed out"
               elsif try.HasCaught()
                 err = JSError.new(try, @to)
