@@ -24,6 +24,9 @@ module V8
       err = nil
       value = nil
 
+      # result = C::Terminator::Exec(@timeout, @native, @to.v8(javascript.to_s), @to.v8(filename.to_s))
+      # value = @to.rb(result)
+
       C::Locker() do
         C::TryCatch.try do |try|
           @native.enter do
