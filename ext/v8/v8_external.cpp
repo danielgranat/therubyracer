@@ -10,11 +10,11 @@ namespace {
   VALUE references;
 
   VALUE New(VALUE rbclass, VALUE value) {
-    HandleScope scope;
+    
     return rr_v8_ref_create(rbclass, rr_v8_external_create(value));
   }
   VALUE Unwrap(VALUE self, VALUE value) {
-    HandleScope scope;
+    
     if (rb_obj_is_kind_of(value, self)) {
       return (VALUE)External::Unwrap(V8_Ref_Get<External>(self));
     } else {
@@ -23,7 +23,7 @@ namespace {
     }
   }
   VALUE _Value(VALUE self) {
-    HandleScope scope;
+    
     return (VALUE)V8_Ref_Get<External>(self)->Value();
   }
   void GCWeakReferenceCallback(Persistent<Value> object, void* parameter) {

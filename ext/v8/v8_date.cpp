@@ -10,7 +10,7 @@ namespace {
   VALUE DateClass;
   
   VALUE New(VALUE self, VALUE time) {
-    HandleScope scope;
+    
     return rr_v8_ref_create(self, Date::New(NUM2DBL(rb_funcall(time, rb_intern("to_f"), 0))));
   }
 }

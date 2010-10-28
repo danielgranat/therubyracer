@@ -18,24 +18,24 @@ namespace {
     exit(1);
   }
   VALUE _ThrowException(VALUE rbmod, VALUE value) {
-    HandleScope scope;
+    
     Handle<Value> err = rr_rb2v8(value);
     return rr_v82rb(ThrowException(err));
   }
   VALUE RangeError(VALUE rbclass, VALUE value) {
-    HandleScope scope;
+    
     return rr_v82rb(Exception::RangeError(rr_rb2v8(value)->ToString()));
   }
   VALUE ReferenceError(VALUE rbclass, VALUE value) {
-    HandleScope scope;
+    
     return rr_v82rb(Exception::ReferenceError(rr_rb2v8(value)->ToString()));
   }
   VALUE SyntaxError(VALUE rbclass, VALUE value) {
-    HandleScope scope;
+    
     return rr_v82rb(Exception::SyntaxError(rr_rb2v8(value)->ToString()));
   }
   VALUE Error(VALUE rbclass, VALUE value) {
-    HandleScope scope;
+    
     return rr_v82rb(Exception::Error(rr_rb2v8(value)->ToString()));
   }
 }

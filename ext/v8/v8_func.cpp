@@ -11,7 +11,7 @@ namespace {
     return V8_Ref_Get<Function>(value);
   }  
   VALUE Call(VALUE self, VALUE recv, VALUE arguments) {
-    HandleScope handles;
+    
     if (!Context::InContext()) {
       rb_raise(rb_eScriptError, "no open V8 Context in V8::C::Function::Call()");
       return Qnil;
@@ -28,7 +28,7 @@ namespace {
   }
   
   VALUE NewInstance(VALUE self, VALUE arguments) {
-    HandleScope scope;
+    
     Local<Function> function = unwrap(self);
     Handle<Array> args = V8_Ref_Get<Array>(arguments);
     int argc = args->Length();

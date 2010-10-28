@@ -12,7 +12,7 @@ public:
 
   virtual void Run() {
     Locker locker;
-    HandleScope scope;
+    
     TerminatorThread terminator(V8::GetCurrentThreadId(), timeout_);
     terminator.Start();
 
@@ -97,7 +97,7 @@ namespace {
 
     VALUE result = Qnil;
     if(ref && ref != Qnil) {
-      HandleScope scope;
+      
       Local<Script> script(V8_Ref_Get<Script>(ref));
       Local<Value> value(script->Run());
       if(value.IsEmpty() == false) {

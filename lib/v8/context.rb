@@ -7,14 +7,17 @@ module V8
 
     def initialize(opts = {})
       C::Locker::StartPreemption(10)
-      @access = Access.new
-      @to = Portal.new(self, @access)
-      @native = opts[:with] ? C::Context::New(@to.rubytemplate) : C::Context::New()
-      @native.enter do
-        @scope = @to.rb(@native.Global())
-        @native.Global().SetHiddenValue(C::String::New("TheRubyRacer::RubyObject"), C::External::New(opts[:with])) if opts[:with]
+      C::Context.Scope do
+        @access = Access.new
+        @to = Portal.new(self, @access)
+        @native = opts[:with] ? C::Context::New(@to.rubytemplate) : C::Context::New()
+        @native.enter do
+          @scope = @to.rb(@native.Global())
+          puts "SetHiddenValue with" if opts[:with]
+          @native.Global().SetHiddenValue(C::String::New("TheRubyRacer::RubyObject"), C::External::New(opts[:with])) if opts[:with]
+        end
+        yield(self) if block_given?
       end
-      yield(self) if block_given?
     end
     
     def eval(javascript, filename = "<eval>", line = 1)

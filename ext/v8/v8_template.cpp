@@ -31,7 +31,7 @@ namespace {
   }
 
   VALUE Set(VALUE self, VALUE name, VALUE value) {
-    HandleScope handles;
+    
     Local<String> key = rr_rb2v8(name)->ToString();
     Local<Data> data = V8_Ref_Get<Data>(value);
     tmpl(self)->Set(key, data);
@@ -182,11 +182,11 @@ namespace {
      }
 
     VALUE New(VALUE rbclass) {
-      HandleScope handles;
+      
       return rr_v8_ref_create(rbclass, ObjectTemplate::New());
     }
     VALUE NewInstance(VALUE self) {
-      HandleScope scope;
+      
       if (!Context::InContext()) {
         rb_raise(rb_eScriptError, "ObjectTemplate::NewInstance() called without an entered Context");
         return Qnil;
@@ -199,7 +199,7 @@ namespace {
       return rr_v82rb(object);
     }
     VALUE SetNamedPropertyHandler(VALUE self, VALUE getter, VALUE setter, VALUE query, VALUE deleter, VALUE enumerator) {
-      HandleScope handles;
+      
       if (!RTEST(getter)) {
         rb_raise(rb_eArgError, "you must supply at least a getter to V8::C::ObjectTemplate#SetNamedPropertyHandler()");
         return Qnil;
@@ -222,7 +222,7 @@ namespace {
       return Qnil;
     }
     VALUE SetIndexedPropertyHandler(VALUE self, VALUE getter, VALUE setter, VALUE query, VALUE deleter, VALUE enumerator) {
-      HandleScope scope;
+      
       if (!RTEST(getter)) {
         rb_raise(rb_eArgError, "you must supply at least a getter to V8::C::ObjectTemplate#SetNamedPropertyHandler()");
         return Qnil;
@@ -246,7 +246,7 @@ namespace {
       return Qnil;
     }
     VALUE SetCallAsFunctionHandler(VALUE self) {
-      HandleScope scope;
+      
       VALUE code = rb_block_proc();
       if (NIL_P(code)) {
         return Qnil;
@@ -259,7 +259,7 @@ namespace {
   namespace Func {
 
     VALUE New(VALUE function_template) {
-      HandleScope handles;
+      
       VALUE code = rb_block_proc();
       if (NIL_P(code)) {
         return Qnil;
@@ -270,7 +270,7 @@ namespace {
       return ref;
     }
     VALUE SetCallHandler(VALUE self) {
-      HandleScope handles;
+      
       VALUE code = rb_block_proc();
       if (NIL_P(code)) {
         return Qnil;
@@ -279,25 +279,25 @@ namespace {
       return Qnil;
     }
     VALUE PrototypeTemplate(VALUE self) {
-      HandleScope scope;
+      
       return rr_v8_ref_create(ObjectTemplateClass, func(self)->PrototypeTemplate());
     }
     VALUE InstanceTemplate(VALUE self) {
-      HandleScope scope;
+      
       return rr_v8_ref_create(ObjectTemplateClass, func(self)->InstanceTemplate());
     }
     VALUE Inherit(VALUE self, VALUE function_template) {
-      HandleScope scope;
+      
       func(self)->Inherit(func(function_template));
       return Qnil;
     }
     VALUE SetClassName(VALUE self, VALUE name) {
-      HandleScope scope;
+      
       func(self)->SetClassName(rr_rb2v8(name)->ToString());
       return Qnil;
     }
     VALUE GetFunction(VALUE self) {
-      HandleScope handles;
+      
       if (!Context::InContext()) {
         rb_raise(rb_eScriptError, "calls to FunctionTemplate::GetFunction() require a Context to be entered");
         return Qnil;

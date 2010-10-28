@@ -13,17 +13,17 @@ namespace {
     return V8_Ref_Get<String>(value);
   }
   VALUE New(VALUE string_class, VALUE data) {
-    HandleScope handles;
+    
     VALUE str = rb_funcall(data, rb_intern("to_s"), 0);
     return rr_v8_ref_create(string_class, String::New(RSTRING_PTR(str), RSTRING_LEN(str)));
   }
   VALUE NewSymbol(VALUE string_class, VALUE data) {
-    HandleScope scope;
+    
     VALUE str = rb_funcall(data, rb_intern("to_s"), 0);
     return rr_v8_ref_create(string_class, String::NewSymbol(RSTRING_PTR(str), RSTRING_LEN(str)));
   }
   VALUE Utf8Value(VALUE self) {
-    HandleScope handles;
+    
     return rb_str_new2(*String::Utf8Value(unwrap(self)));
   }
   VALUE Utf16Value(VALUE self) {
@@ -31,13 +31,13 @@ namespace {
     return Qnil;
   }
   VALUE AsciiValue(VALUE self) {
-    HandleScope handles;
+    
     return rb_str_new2(*String::AsciiValue(unwrap(self)));
   }
 }
 
 VALUE rr_reflect_v8_string(Handle<Value> value) {
-  HandleScope handles;
+  
   Local<String> string = String::Cast(*value);
   return rr_v8_ref_create(StringClass, string);
 }

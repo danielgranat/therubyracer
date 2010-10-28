@@ -49,7 +49,7 @@ namespace {
   
   VALUE Try(int argc, VALUE *argv, VALUE self) {
     if (rb_block_given_p()) {
-      HandleScope scope;
+      
       TryCatch tc;
       try_catch *wrapper = new try_catch(&tc);
       kill_try_catch kill_on_return(wrapper);

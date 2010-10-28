@@ -23,7 +23,7 @@ namespace {
     if (NIL_P(length)) {
       length = INT2FIX(0);
     }
-    HandleScope scope;
+    
     return rr_v8_ref_create(self, Array::New(NUM2INT(length)));
   }
   

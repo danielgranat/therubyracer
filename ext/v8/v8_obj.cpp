@@ -17,7 +17,7 @@ namespace {
   }
   
   VALUE Get(VALUE self, VALUE key) {
-    HandleScope handles;
+    
     Local<Object> obj(unwrap(self));
     if (rb_obj_is_kind_of(key, rb_cNumeric)) {
       return rr_v82rb(obj->Get(NUM2UINT(key)));
@@ -27,7 +27,7 @@ namespace {
   }
   
   VALUE New(VALUE rbclass) {
-    HandleScope handles;
+    
     if (!Context::InContext()) {
       rb_raise(rb_eScriptError, "Object::New() called without an entered Context");
       return Qnil;
@@ -36,7 +36,7 @@ namespace {
   }
   
   VALUE Set(VALUE self, VALUE key, VALUE value) {
-    HandleScope handles;
+    
     Local<Object> obj = unwrap(self);
     if (rb_obj_is_kind_of(key, rb_cNumeric)) {
       return rr_v82rb(obj->Set(NUM2UINT(key), rr_rb2v8(value)));
@@ -46,13 +46,12 @@ namespace {
   }
 
   VALUE GetPropertyNames(VALUE self) {
-    HandleScope handles;
+    
     Local<Object> object = unwrap(self);  
     Local<Value> names = object->GetPropertyNames();
     return rr_v82rb(names);
   }
   VALUE SetHiddenValue(VALUE self, VALUE key, VALUE value) {
-    HandleScope scope;
     if (Context::InContext()) {
       unwrap(self)->SetHiddenValue(rr_rb2v8(key)->ToString(), rr_rb2v8(value));
     } else {
@@ -61,15 +60,15 @@ namespace {
     return Qnil;
   }
   VALUE GetHiddenValue(VALUE self, VALUE key) {
-    HandleScope scope;
+    
     return rr_v82rb(unwrap(self)->GetHiddenValue(rr_rb2v8(key)->ToString()));
   }
   VALUE GetPrototype(VALUE self) {
-    HandleScope scope;
+    
     return rr_v82rb(unwrap(self)->GetPrototype());
   }
   VALUE SetPrototype(VALUE self, VALUE prototype) {
-    HandleScope scope;
+    
     Handle<Value> proto = rr_rb2v8(prototype);
     Local<Object> me = unwrap(self);
     return rr_v82rb(unwrap(self)->SetPrototype(rr_rb2v8(prototype)));

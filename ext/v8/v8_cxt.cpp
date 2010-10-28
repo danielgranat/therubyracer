@@ -16,7 +16,7 @@ namespace {
   }
 
   VALUE New(int argc, VALUE *argv, VALUE self) {
-    HandleScope handles;
+
     VALUE global_template; VALUE global_object;
     rb_scan_args(argc,argv, "02", &global_template, &global_object);
     Handle<ObjectTemplate> v8_global_template(NIL_P(global_template) ? Handle<ObjectTemplate>() : V8_Ref_Get<ObjectTemplate>(global_template));
@@ -32,7 +32,7 @@ namespace {
   }
 
   VALUE GetEntered(VALUE self) {
-    HandleScope handles;
+    
     if (Context::InContext()) {
       Local<Context> current = Context::GetEntered();
       return rr_v8_ref_create(self, current);    
@@ -42,24 +42,24 @@ namespace {
   }
 
   VALUE Global(VALUE self) {
-    HandleScope handles;
+
     return rr_v82rb(unwrap(self)->Global());
   }  
 
   VALUE Enter(VALUE self) {
-    HandleScope handles;
+    
     unwrap(self)->Enter();
     return self;
   }
 
   VALUE Exit(VALUE self) {
-    HandleScope handles;
+    
     unwrap(self)->Exit();
     return self;
   }
 
   VALUE IsEntered(VALUE self) {
-    HandleScope handles;
+    
     if (Context::InContext()) {
       return rr_v82rb(unwrap(self) == Context::GetEntered());
     } else {
@@ -67,13 +67,24 @@ namespace {
     }
   }
   VALUE GetData(VALUE self) {
-    HandleScope scope;
+    
     return rr_v82rb(unwrap(self)->GetData());
   }
   VALUE SetData(VALUE self, VALUE data) {
-    HandleScope scope;
+    
     unwrap(self)->SetData(rr_rb2v8(data)->ToString());
     return Qnil;
+  }
+
+  VALUE Scope(VALUE self) {
+    if (rb_block_given_p()) {
+      
+      HandleScope scope;
+      VALUE result = rb_yield(Qnil);
+      return result;
+    } else {
+      return Qnil;
+    }
   }
 }
 
@@ -82,6 +93,7 @@ void rr_init_cxt() {
   rr_define_singleton_method(ContextClass, "New", New, -1);
   rr_define_singleton_method(ContextClass, "InContext", InContext, 0);
   rr_define_singleton_method(ContextClass, "GetEntered", GetEntered, 0);
+  rr_define_singleton_method(ContextClass, "Scope", Scope, 0);
   rr_define_method(ContextClass, "Global", Global, 0);
   rr_define_method(ContextClass, "Enter", Enter, 0);
   rr_define_method(ContextClass, "Exit", Exit, 0);

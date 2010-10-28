@@ -138,7 +138,7 @@ module V8
           raise e
         else
           error = V8::C::Exception::Error(V8::C::String::New(e.message))
-          error.SetHiddenValue("TheRubyRacer::Cause", C::External::New(e))
+          error.SetHiddenValue("TheRubyRacer::Cause", C::External::New(e)) if error.respond_to?(:SetHiddenValue)
           V8::C::ThrowException(error)
         end
       end
