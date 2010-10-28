@@ -30,30 +30,32 @@ module V8
       # result = C::Terminator::Exec(@timeout, @native, @to.v8(javascript.to_s), @to.v8(filename.to_s))
       # value = @to.rb(result)
 
-      C::Locker() do
-        C::TryCatch.try do |try|
-          @native.enter do
-            script = C::Script::Compile(@to.v8(javascript.to_s), @to.v8(filename.to_s))
-            if try.HasCaught()
-              err = JSError.new(try, @to)
-            else
-              
-              timedout = false
-              result = nil
-              if @timeout
-                timedout = C::Terminator::Run(@timeout, nil) do
-                  result = script.Run()
-                end
-              else
-                result = script.Run()
-              end
-
-              if timedout || result == C::TimeoutError
-                err = Timeout::Error.new "Timed out"
-              elsif try.HasCaught()
+      C::Context.Scope do
+        C::Locker() do
+          C::TryCatch.try do |try|
+            @native.enter do
+              script = C::Script::Compile(@to.v8(javascript.to_s), @to.v8(filename.to_s))
+              if try.HasCaught()
                 err = JSError.new(try, @to)
               else
-                value = @to.rb(result)
+                
+                timedout = false
+                result = nil
+                if @timeout
+                  timedout = C::Terminator::Run(@timeout, nil) do
+                    result = script.Run()
+                  end
+                else
+                  result = script.Run()
+                end
+
+                if timedout || result == C::TimeoutError
+                  err = Timeout::Error.new "Timed out"
+                elsif try.HasCaught()
+                  err = JSError.new(try, @to)
+                else
+                  value = @to.rb(result)
+                end
               end
             end
           end

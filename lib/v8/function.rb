@@ -16,7 +16,9 @@ module V8
     end
     
     def call(*args)
-      self.methodcall(@portal.context.native.Global(), *args)
+      C::Context.Scope do
+        self.methodcall(@portal.context.native.Global(), *args)
+      end
     end
     
     def new(*args)
