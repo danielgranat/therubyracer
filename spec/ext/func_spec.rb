@@ -55,4 +55,77 @@ describe C::Function do
       end
     }.should raise_error(Timeout::Error)
   end
+
+  it "should be able to create another context from within a context" do
+    def add_cxt(n1, n2)
+      sum = nil
+      Context.new do |cxt|
+        cxt['sum'] = lambda { |a, b| a + b }
+        sum = cxt.eval("sum(#{n1}, #{n2});")
+      end
+      sum
+    end
+
+    Context.new do |cxt|
+      cxt['add'] = lambda { |a, b| add_cxt a, b }
+      cxt.eval("add(1,1);").should == 2
+    end
+  end
+
+  it "should timeout even when a 2nd context takes to long" do
+    def do_loop
+      Context.new do |cxt|
+        cxt.eval 'while(true) {}'
+      end
+    end
+
+    lambda {
+      Context.new do |cxt|
+        cxt['loop'] = lambda { do_loop }
+        cxt.timeout = 10000
+        cxt.eval("loop();");
+      end
+    }.should raise_error(Timeout::Error)
+  end
+
+  it "should error even when the 2nd context times out" do
+    def do_loop
+      Context.new do |cxt|
+        cxt.timeout = 100
+        cxt.eval 'while(true) {}'
+      end
+    end
+
+    lambda {
+      Context.new do |cxt|
+        cxt['loop'] = lambda { do_loop }
+        cxt.eval("loop();");
+      end
+    }.should raise_error(V8::JSError)
+  end
+
+#  Below test can seg fault. Sometimes the test will pass.
+#  Not sure if it is a just an issue with Ruby Threads
+#  it "should work with multiple threads" do
+#    locked = true
+#
+#    cxt1 = Context.new do |cxt|
+#      cxt['locked'] = lambda { locked }
+#    end
+#
+#    cxt2 = Context.new do |cxt|
+#      cxt['unlock'] = lambda { locked = false }
+#    end
+#
+#    t1 = Thread.new do
+#      cxt1.eval("while(locked()) {}")
+#    end
+#
+#    t2 = Thread.new do
+#      cxt2.eval("unlock();")
+#    end
+#
+#    t2.join
+#    t1.join
+#  end
 end
