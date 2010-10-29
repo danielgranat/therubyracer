@@ -6,8 +6,8 @@ module V8
     attr_accessor :timeout
 
     def initialize(opts = {})
-      C::Locker::StartPreemption(10)
-      C::Context.Scope do
+      C::Locker() do
+        C::Locker::StartPreemption(10)
         @access = Access.new
         @to = Portal.new(self, @access)
         @native = opts[:with] ? C::Context::New(@to.rubytemplate) : C::Context::New()
@@ -27,35 +27,29 @@ module V8
       err = nil
       value = nil
 
-      # result = C::Terminator::Exec(@timeout, @native, @to.v8(javascript.to_s), @to.v8(filename.to_s))
-      # value = @to.rb(result)
-
-      C::Context.Scope do
-        C::Locker() do
-          C::TryCatch.try do |try|
-            @native.enter do
-              script = C::Script::Compile(@to.v8(javascript.to_s), @to.v8(filename.to_s))
-              if try.HasCaught()
-                err = JSError.new(try, @to)
-              else
-                
-                timedout = false
-                result = nil
-                if @timeout
-                  timedout = C::Terminator::Run(@timeout, nil) do
-                    result = script.Run()
-                  end
-                else
+      C::Locker() do
+        C::TryCatch.try do |try|
+          @native.enter do
+            script = C::Script::Compile(@to.v8(javascript.to_s), @to.v8(filename.to_s))
+            if try.HasCaught()
+              err = JSError.new(try, @to)
+            else
+              timedout = false
+              result = nil
+              if @timeout
+                timedout = C::Terminator::Run(@timeout, nil) do
                   result = script.Run()
                 end
+              else
+                result = script.Run()
+              end
 
-                if timedout || result == C::TimeoutError
-                  err = Timeout::Error.new "Timed out"
-                elsif try.HasCaught()
-                  err = JSError.new(try, @to)
-                else
-                  value = @to.rb(result)
-                end
+              if timedout || result == C::TimeoutError
+                err = Timeout::Error.new "Timed out"
+              elsif try.HasCaught()
+                err = JSError.new(try, @to)
+              else
+                value = @to.rb(result)
               end
             end
           end

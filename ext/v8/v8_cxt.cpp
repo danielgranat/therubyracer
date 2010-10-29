@@ -75,17 +75,6 @@ namespace {
     unwrap(self)->SetData(rr_rb2v8(data)->ToString());
     return Qnil;
   }
-
-  VALUE Scope(VALUE self) {
-    if (rb_block_given_p()) {
-      
-      HandleScope scope;
-      VALUE result = rb_yield(Qnil);
-      return result;
-    } else {
-      return Qnil;
-    }
-  }
 }
 
 void rr_init_cxt() {
@@ -93,7 +82,6 @@ void rr_init_cxt() {
   rr_define_singleton_method(ContextClass, "New", New, -1);
   rr_define_singleton_method(ContextClass, "InContext", InContext, 0);
   rr_define_singleton_method(ContextClass, "GetEntered", GetEntered, 0);
-  rr_define_singleton_method(ContextClass, "Scope", Scope, 0);
   rr_define_method(ContextClass, "Global", Global, 0);
   rr_define_method(ContextClass, "Enter", Enter, 0);
   rr_define_method(ContextClass, "Exit", Exit, 0);

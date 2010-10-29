@@ -6,6 +6,7 @@ using namespace v8;
 namespace {
   VALUE Lock(VALUE self) {
     Locker locker;
+    HandleScope scope;
     return rb_yield(Qnil);
   }
   VALUE Unlock(VALUE self) {

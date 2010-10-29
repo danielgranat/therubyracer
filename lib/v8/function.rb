@@ -16,7 +16,7 @@ module V8
     end
     
     def call(*args)
-      C::Context.Scope do
+      C::Locker() do
         self.methodcall(@portal.context.native.Global(), *args)
       end
     end
