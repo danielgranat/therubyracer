@@ -2,7 +2,7 @@ $:.unshift(File.dirname(__FILE__)) unless
   $:.include?(File.dirname(__FILE__)) || $:.include?(File.expand_path(File.dirname(__FILE__)))
 
 module V8
-  VERSION = '0.8.0.pre'
+  require 'v8/version'
   require 'v8/v8' #native glue
   require 'v8/portal'
   require 'v8/portal/functions'
@@ -13,5 +13,6 @@ module V8
   require 'v8/tap'
   require 'v8/access'
   require 'v8/error'
+  require 'v8/stack'
   require 'v8/constraints'
 end

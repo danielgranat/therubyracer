@@ -9,7 +9,7 @@ puts "Compiling V8"
 
 system("cd #{UPSTREAM} && make") or raise "Error compiling V8"
 
-find_header('v8.h', "#{BUILD}/src")
+find_header('v8.h', "#{BUILD}/include")
 find_header('platform.h',"#{BUILD}/src")
 have_library('pthread')
 have_library('objc') if RUBY_PLATFORM =~ /darwin/

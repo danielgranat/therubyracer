@@ -15,6 +15,8 @@
 #include "v8_locker.h"
 #include "v8_constraints.h"
 #include "v8_terminator.h"
+#include "v8_debug.h"
+#include "v8_v8.h"
 
 #include <stdio.h>
 
@@ -41,5 +43,7 @@ extern "C" {
         rr_init_v8_locker();
         rr_init_constraints();
         rr_init_terminator();
+        rr_init_v8_debug();
+        rr_init_v8_v8();
     }
 }

@@ -1,7 +1,7 @@
 require 'stringio'
 
 module V8
-  class Context    
+  class Context
     attr_reader :native, :scope, :access
     attr_accessor :timeout
 
@@ -11,12 +11,14 @@ module V8
       @to = Portal.new(self, @access)
       @native = opts[:with] ? C::Context::New(@to.rubytemplate) : C::Context::New()
       @native.enter do
-        @scope = @to.rb(@native.Global())
-        @native.Global().SetHiddenValue(C::String::New("TheRubyRacer::RubyObject"), C::External::New(opts[:with])) if opts[:with]
+        @global = @native.Global()
+        @scope = @to.rb(@global)
+        @global.SetHiddenValue(C::String::New("TheRubyRacer::RubyObject"), C::External::New(opts[:with])) if opts[:with]
+        @global.SetHiddenValue(C::String::NewSymbol("TheRubyRacer::RubyContext"), C::External::New(self))
       end
       yield(self) if block_given?
     end
-    
+
     def eval(javascript, filename = "<eval>", line = 1)
       if IO === javascript || StringIO === javascript
         javascript = javascript.read()
@@ -24,9 +26,9 @@ module V8
       err = nil
       value = nil
 
-      # result = C::Terminator::Exec(@timeout, @native, @to.v8(javascript.to_s), @to.v8(filename.to_s))
-      # value = @to.rb(result)
-
+      result = C::Terminator::Exec(@timeout, @native, @to.v8(javascript.to_s), @to.v8(filename.to_s))
+      value = @to.rb(result)
+=begin
       C::Locker() do
         C::TryCatch.try do |try|
           @native.enter do
@@ -56,35 +58,33 @@ module V8
           end
         end
       end
-
+=end
       raise err if err
       return value
     end
-            
-    def evaluate(*args)
-      self.eval(*args)
-    end
-    
+
     def load(filename)
       File.open(filename) do |file|
-        evaluate file, filename, 1
-      end      
+        self.eval file, filename, 1
+      end
     end
-    
+
     def [](key)
       @scope[key]
     end
-    
+
     def []=(key, value)
       @scope[key] = value
     end
 
-    def self.eval(source)
-      new.eval(source)
-    end
-    
-    def V8.eval(*args)
-      V8::Context.eval(*args)
+    def self.stack(limit = 99)
+      if native = C::Context::GetEntered()
+        global = native.Global().instance_eval {@native}
+        cxt = global.GetHiddenValue(C::String::NewSymbol("TheRubyRacer::RubyContext")).Value()
+        cxt.instance_eval {@to.rb(C::StackTrace::CurrentStackTrace(limit))}
+      else
+        []
+      end
     end
   end
 

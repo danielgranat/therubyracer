@@ -1,9 +1,9 @@
 --- platform.h
 +++ platform.h
-@@ -364,7 +364,7 @@ class Thread: public ThreadHandle {
- 
+@@ -391,7 +391,7 @@ class Thread: public ThreadHandle {
    // Create new thread.
    Thread();
+   explicit Thread(const char* name);
 -  virtual ~Thread();
 +  virtual ~Thread()=0;
  
