@@ -129,6 +129,7 @@ namespace {
     executor.Join();
 
     if(executor.Timedout()) {
+      rb_raise(rb_eScriptError, "Script execusion has timed out");
       return TimeoutErrorClass;
     } else if (executor.HasError()) {
       // Need to return error here
