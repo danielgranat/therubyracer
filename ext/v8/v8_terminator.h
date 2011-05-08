@@ -24,6 +24,4 @@ class TerminatorThread : public internal::Thread {
     internal::Semaphore* sem_;
 };
 
-void rr_init_terminator();
-
 #endif

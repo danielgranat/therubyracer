@@ -42,7 +42,6 @@ extern "C" {
         rr_init_v8_exception();
         rr_init_v8_locker();
         rr_init_constraints();
-        rr_init_terminator();
         rr_init_v8_debug();
         rr_init_v8_v8();
     }
