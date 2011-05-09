@@ -29,7 +29,7 @@ namespace {
     return result.IsEmpty() ? Qnil : rr_v82rb(result);
   }
 
-  VALUE RunTimeout(VALUE self, VALUE timeout, VALUE source, VALUE source_name ) {
+  VALUE RunTimeout(VALUE self, VALUE timeout) {
 	printf( "Running ...\n");
 	V8::AssignThreadId();
 	printf( "Running thread id(%d)\n", V8::GetCurrentThreadId() );
@@ -57,5 +57,5 @@ void rr_init_script() {
   rr_define_singleton_method(ScriptClass, "New", New, 2);
   rr_define_singleton_method(ScriptClass, "Compile", Compile, 2);
   rr_define_method(ScriptClass, "Run", Run, 0);
-  rr_define_method(ScriptClass, "Run", RunTimeout, 3);
+  rr_define_method(ScriptClass, "Run", RunTimeout, 1);
 }

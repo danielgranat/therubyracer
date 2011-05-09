@@ -35,7 +35,7 @@ module V8
             timedout = false
             result = nil
             if @timeout
-              result = script.Run(@timeout, @to.v8(javascript.to_s), @to.v8(filename.to_s) )
+              result = script.Run(@timeout)
             else
               result = script.Run()
             end
