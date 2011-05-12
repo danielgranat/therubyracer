@@ -27,8 +27,6 @@ $(V8SRC): build
 	cp -r $(V8VERSION) build/v8
 	patch -td build/v8 -i ../../fpic-on-linux-amd64.patch
 	patch -td build/v8/src -i ../../../platform-thread-missing-destructor.patch
-	patch -td build/v8/include -i ../../../assign_thread_id_func_decleration.patch
-	patch -td build/v8/src -i ../../../assign_thread_id_func_impl.patch
 
 $(SCONSSRC): build
 	cp -r scons build

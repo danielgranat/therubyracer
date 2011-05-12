@@ -22,7 +22,6 @@ namespace {
   }
 
   VALUE Run(VALUE self) {
-	printf( "Running (Actualy) ...\n");
 	HandleScope scope;
     Local<Script> script(V8_Ref_Get<Script>(self));
     Local<Value> result(script->Run());
@@ -30,16 +29,10 @@ namespace {
   }
 
   VALUE RunTimeout(VALUE self, VALUE timeout) {
-	printf( "Running ...\n");
-	V8::AssignThreadId();
-	printf( "Running thread id(%d)\n", V8::GetCurrentThreadId() );
-
-	printf( "Running thread lock(%d)\n", V8::GetCurrentThreadId() );
-	TerminatorThread terminator(V8::GetCurrentThreadId(), NUM2INT(rb_to_int(timeout)));
+	TerminatorThread terminator(NUM2INT(rb_to_int(timeout)));
 	terminator.Start();
 
     VALUE result = Run( self );
-    printf( "Done Running thread id(%d)\n", V8::GetCurrentThreadId() );
     terminator.Finished();
     terminator.Join();
 

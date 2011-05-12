@@ -7,12 +7,7 @@
 using namespace v8;
 
 void TerminatorThread::Run() {
-  V8::AssignThreadId();
-  printf( "TerminatorThread thread id(%d), timeout(%d)\n", V8::GetCurrentThreadId(), timeout_ );
-  if (! sem_->Wait(timeout_) )
-	  printf( "TerminatorThread done waiting- timedout\n");
-  else
-	  printf( "TerminatorThread done waiting\n");
+  sem_->Wait(timeout_);
 
   if(finished_) {
     return;
@@ -20,16 +15,11 @@ void TerminatorThread::Run() {
 
   timedout_ = true;
   {
-	printf( "TerminatorThread lock.... \n");
-    Locker locker;
-    printf( "TerminatorThread locked! terminate(%d)\n", executing_thread_id_ );
-    V8::TerminateExecution(executing_thread_id_);
-    printf( "TerminatorThread terminated..!\n");
+	V8::TerminateExecution();
   }
 }
 
 void TerminatorThread::Finished() { 
-  printf( "TerminatorThread Finished\n");
   finished_ = true; 
   sem_->Signal();
 }
