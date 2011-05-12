@@ -6,7 +6,7 @@ module V8
     attr_accessor :timeout
 
     def initialize(opts = {})
-      C::Locker::StartPreemption(1)
+      C::Locker::StartPreemption(50)
       @access = Access.new
       @to = Portal.new(self, @access)
       @native = opts[:with] ? C::Context::New(@to.rubytemplate) : C::Context::New()
